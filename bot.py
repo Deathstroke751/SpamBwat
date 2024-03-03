@@ -2,6 +2,7 @@ from logging.handlers import RotatingFileHandler
 import logging
 from telethon import TelegramClient
 from dotenv import dotenv_values
+from modules.env_utils import env_list
 import time
 
 logfile = "spamlog.log"
@@ -26,7 +27,9 @@ config_env = dotenv_values(dotenv_file)
 api_id = config_env["API_ID"]
 api_hash = config_env["API_HASH"]
 chat_id = int(config_env["CHAT_ID"])
-msg = config_env["MSG"]
+
+# msg = config_env["MSG"]
+
 msg_interval = float(config_env["INTERVAL_BTW_MSG"])
 session_interval = float(config_env["INTERVAL_BTW_SESSION"])
 session_duration = float(config_env["SESSION_DURATION"])
@@ -45,16 +48,27 @@ async def main():
 
     if chat_id != 484506892:
         count = 1
-        while int(time.time()) < current_time + total_time:
+        _index = 0
+
+        while int(time.time()) < current_time + total_time:  # Runtime
             # for i in range(500):
             time_now = int(time.time())
+            msgs = env_list('MSG')
+
+            _total_msgs = len(msgs)
+            if _index >= _total_msgs:
+                _index = 0
+
+            msg = msgs[_index]
+
             logging.info(f"Session {count} : Started")
-            while int(time.time()) < time_now + session_duration:
+            while int(time.time()) < time_now + session_duration:  # Session
                 await client.send_message(chat_id, msg)
                 time.sleep(msg_interval)
             logging.info(f"Session {count} : Ended")
             time.sleep(session_interval)
             count += 1
+            _index += 1
 
     await client.disconnect()
 

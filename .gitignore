@@ -1,2 +1,5 @@
 *.session
+*.log
 og.env
+modules/__pycache__
+*.
